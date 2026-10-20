@@ -1,13 +1,13 @@
 import os
 import time
+from pathlib import Path
 import requests
 from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Voice to Text API (Vercel Serverless)")
+app = FastAPI(title="Voice to Text API - Vercel Serverless")
 
-# Enable CORS for web clients
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,6 +20,14 @@ def fmt_time(seconds: float) -> str:
     m, s = divmod(max(0, int(seconds)), 60)
     return f"{m:02d}:{s:02d}"
 
+@app.get("/")
+def home():
+    for p in [Path("public/index.html"), Path("index.html")]:
+        if p.exists():
+            return HTMLResponse(p.read_text(encoding="utf-8"))
+    return HTMLResponse("<h1>Voice to Text Serverless API Live</h1>")
+
+@app.get("/health")
 @app.get("/api/health")
 def health():
     return {
@@ -28,10 +36,10 @@ def health():
         "cli_found": False,
         "ffmpeg_found": False,
         "cloud_ready": True,
-        "available_models": ["groq: whisper-large-v3", "openai: whisper-1"],
-        "message": "Cloud Vercel Serverless Mode Active"
+        "message": "Cloud Vercel Serverless Ready"
     }
 
+@app.post("/transcribe")
 @app.post("/api/transcribe")
 async def transcribe(
     file: UploadFile = File(...),
@@ -43,7 +51,7 @@ async def transcribe(
     key = (api_key or "").strip() or os.getenv("GROQ_API_KEY", "") or os.getenv("OPENAI_API_KEY", "")
     if not key:
         return JSONResponse(
-            {"error": "API Key darj karein! Groq (console.groq.com) ya OpenAI key zaroori hai."},
+            {"error": "API Key zaroori hai! Groq ya OpenAI key enter karein."},
             status_code=400,
         )
 
@@ -91,7 +99,6 @@ async def transcribe(
         summary = None
         if str(want_summary).lower() in ("true", "1", "yes") and full_text and provider == "groq":
             try:
-                # Use Groq free LLM for summary
                 sum_resp = requests.post(
                     "https://api.groq.com/openai/v1/chat/completions",
                     headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
@@ -100,7 +107,7 @@ async def transcribe(
                         "messages": [
                             {
                                 "role": "system",
-                                "content": "Neeche ek voice note ka text hai. Iska Roman Urdu mein 1-2 jumlon mein khulasa likhein."
+                                "content": "Voice note ka Roman Urdu mein 1-2 jumlon mein khulasa likhein."
                             },
                             {"role": "user", "content": full_text}
                         ],

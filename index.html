@@ -349,46 +349,118 @@
       currentFileText.textContent = `Processing: ${file.name} (${i + 1}/${total})...`;
       jobStatusText.textContent = `Progress: ${done}/${total} completed`;
 
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('language', document.getElementById('language').value);
-      fd.append('api_provider', document.getElementById('apiProvider').value);
-      fd.append('api_key', apiKey);
-      fd.append('want_summary', document.getElementById('wantSummary').checked);
+      const provider = document.getElementById('apiProvider').value;
+      const lang = document.getElementById('language').value;
+      const wantSummary = document.getElementById('wantSummary').checked;
+      let transcribedOk = false;
 
+      // 1. Direct browser call to Groq / OpenAI (Lightning fast, bypasses 4.5MB serverless limit)
       try {
-        const res = await fetch('/api/transcribe', { method: 'POST', body: fd });
-        const data = await res.json();
+        const directUrl = provider === 'openai'
+          ? 'https://api.openai.com/v1/audio/transcriptions'
+          : 'https://api.groq.com/openai/v1/audio/transcriptions';
+        const directModel = provider === 'openai' ? 'whisper-1' : 'whisper-large-v3';
 
-        if (res.ok && data.status === 'ok') {
+        const directFd = new FormData();
+        directFd.append('file', file);
+        directFd.append('model', directModel);
+        directFd.append('response_format', 'verbose_json');
+        if (lang && lang !== 'auto') directFd.append('language', lang);
+
+        const directStart = Date.now();
+        const directRes = await fetch(directUrl, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${apiKey}` },
+          body: directFd
+        });
+
+        if (directRes.ok) {
+          const directData = await directRes.json();
+          const tookSec = ((Date.now() - directStart) / 1000).toFixed(1);
+          let summary = null;
+
+          if (wantSummary && provider === 'groq' && directData.text) {
+            try {
+              const sumRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  model: 'llama-3.3-70b-versatile',
+                  messages: [
+                    { role: 'system', content: 'Voice message ka Roman Urdu mein 1-2 jumlon mein khulasa likhein.' },
+                    { role: 'user', content: directData.text }
+                  ],
+                  max_tokens: 150
+                })
+              });
+              if (sumRes.ok) {
+                const sumData = await sumRes.json();
+                summary = sumData.choices?.[0]?.message?.content?.trim();
+              }
+            } catch(e) {}
+          }
+
           appendResult({
             index: i,
             filename: file.name,
-            text: data.text,
-            took_sec: data.took_sec,
-            duration: data.duration,
-            language: data.language,
-            summary: data.summary,
+            text: directData.text,
+            took_sec: tookSec,
+            duration: directData.duration ? (Math.round(directData.duration) + 's') : '',
+            language: directData.language || lang,
+            summary: summary,
             status: 'ok'
           });
-          completedTranscripts.push({ name: file.name, text: data.text, summary: data.summary });
-        } else {
+          completedTranscripts.push({ name: file.name, text: directData.text, summary: summary });
+          transcribedOk = true;
+        }
+      } catch (directErr) {
+        console.warn("Direct browser call failed, trying serverless API fallback...", directErr);
+      }
+
+      // 2. Serverless fallback if direct call did not succeed
+      if (!transcribedOk) {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('language', lang);
+        fd.append('api_provider', provider);
+        fd.append('api_key', apiKey);
+        fd.append('want_summary', wantSummary);
+
+        try {
+          const res = await fetch('/api/transcribe', { method: 'POST', body: fd });
+          const data = await res.json();
+
+          if (res.ok && data.status === 'ok') {
+            appendResult({
+              index: i,
+              filename: file.name,
+              text: data.text,
+              took_sec: data.took_sec,
+              duration: data.duration,
+              language: data.language,
+              summary: data.summary,
+              status: 'ok'
+            });
+            completedTranscripts.push({ name: file.name, text: data.text, summary: data.summary });
+            transcribedOk = true;
+          } else {
+            errors++;
+            appendResult({
+              index: i,
+              filename: file.name,
+              error: data.error || 'Failed to transcribe',
+              status: 'error'
+            });
+          }
+        } catch (err) {
           errors++;
           appendResult({
             index: i,
             filename: file.name,
-            error: data.error || 'Failed to transcribe',
+            error: err.message,
             status: 'error'
           });
         }
-      } catch (err) {
-        errors++;
-        appendResult({
-          index: i,
-          filename: file.name,
-          error: err.message,
-          status: 'error'
-        });
       }
 
       done++;
