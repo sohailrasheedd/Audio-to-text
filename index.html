@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice to Text PRO - Hybrid Cloud & Local</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px; max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 6px; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .status-bar { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; margin-bottom: 16px; }
+    .badge { padding: 6px 12px; border-radius: 999px; font-weight: 600; background: #0f172a; border: 1px solid var(--border); }
+    .badge.ok { color: var(--success); border-color: var(--success); }
+    .badge.err { color: var(--danger); border-color: var(--danger); }
+    .drop-zone {
+      border: 2px dashed var(--border); border-radius: 12px; padding: 36px 20px;
+      text-align: center; cursor: pointer; transition: 0.2s; margin-bottom: 20px;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--primary); background: rgba(59, 130, 246, 0.08); }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    label { display: block; font-size: 0.88rem; color: var(--muted); margin-bottom: 8px; }
+    select, input[type="file"], input[type="password"] {
+      width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; transition: 0.2s;
+    }
+    select:focus, input[type="password"]:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+    .checkbox-wrap { display: flex; align-items: center; gap: 8px; padding-top: 30px; }
+    .checkbox-wrap input { width: 18px; height: 18px; cursor: pointer; }
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    button, .btn-link {
+      padding: 12px 24px; border-radius: 8px; border: none; font-weight: 600;
+      cursor: pointer; font-size: 1rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
+    }
+    .btn-primary { background: var(--gradient); color: white; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    
+    .mode-section { grid-column: 1 / -1; background: rgba(59, 130, 246, 0.05); padding: 20px; border-radius: 10px; border: 1px solid var(--primary); }
+    .radio-group { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text); font-size: 1rem; padding: 10px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); flex: 1; transition: 0.2s; }
+    .radio-label:hover { border-color: var(--primary); }
+    .radio-label input:checked + span { font-weight: bold; color: var(--primary); }
+    
+    .progress-bar-bg { width: 100%; height: 12px; background: var(--bg); border-radius: 999px; overflow: hidden; margin: 10px 0; }
+    .progress-bar-fill { height: 100%; background: var(--gradient); width: 0%; transition: width 0.3s; }
+    .meta-info { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--muted); flex-wrap: wrap; gap: 8px; }
+    
+    .result-item { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+    .result-head { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--muted); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .result-text { font-size: 1.1rem; line-height: 1.7; white-space: pre-wrap; direction: rtl; text-align: right; }
+    .result-text.ltr { direction: ltr; text-align: left; }
+    .copy-btn { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 4px 12px; font-size: 0.8rem; border-radius: 6px; cursor: pointer; }
+    .copy-btn:hover { background: var(--border); }
+  </style>
+</head>
+<body>
+
+  <h1>🎙️ Voice to Text PRO (Hybrid Edition)</h1>
+  <p class="subtitle">Portfolio Project: Switch between Free Local CPU processing and Lightning-Fast Cloud API</p>
+
+  <div id="healthBar" class="status-bar"></div>
+
+  <div class="card">
+    <div class="drop-zone" id="dropZone">
+      <p style="font-size: 1.2rem; margin-bottom: 8px;">📂 <strong>Drop Audio Files Here</strong> or Click to Browse</p>
+      <p style="color: var(--muted); font-size: 0.9rem;">Supports WhatsApp Voice Notes, MP3, WAV, M4A, OGG, MP4</p>
+      <input type="file" id="fileInput" multiple accept="audio/*,video/*,.opus,.ogg,.m4a,.mp3,.wav,.flac,.aac,.amr" style="display:none" />
+      <p id="selectedCount" style="margin-top: 12px; color: var(--primary); font-weight: 600; font-size: 1.1rem;"></p>
+    </div>
+
+    <div class="controls">
+      <!-- MODE SELECTION -->
+      <div class="mode-section">
+        <label style="color: var(--primary); font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">⚡ Processing Architecture</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="mode" value="local" checked onchange="toggleMode()" style="width: 18px; height: 18px;"> 
+            <span>💻 Local CPU (Free, Offline, Slower)</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="mode" value="cloud" onchange="toggleMode()" style="width: 18px; height: 18px;"> 
+            <span>☁️ Cloud Turbo API (2 Sec Speed, 99% Exact)</span>
+          </label>
+        </div>
+
+        <div id="apiBox" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border);">
+           <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+             <div style="flex: 1; min-width: 200px;">
+               <label>Cloud Provider</label>
+               <select id="apiProvider">
+                  <option value="groq">Groq LPU (Ultra-Fast - Free Tier Available)</option>
+                  <option value="openai">OpenAI (Standard Whisper API)</option>
+               </select>
+             </div>
+             <div style="flex: 2; min-width: 250px;">
+               <label>Secret API Key <a href="https://console.groq.com/keys" target="_blank" style="color: var(--primary); text-decoration: none; font-size: 0.85rem; float: right; font-weight: bold;">Get Free Groq Key</a></label>
+               <input type="password" id="apiKey" placeholder="Paste your gsk_... key here" />
+             </div>
+           </div>
+           <p style="font-size: 0.85rem; color: var(--muted); margin-top: 10px;">🔒 Security Guarantee: Your API key is sent directly to the provider and is NEVER saved or logged on our server.</p>
+        </div>
+      </div>
+
+      <div>
+        <label>Spoken Language</label>
+        <select id="language">
+          <option value="ur" selected>Urdu (اردو)</option>
+          <option value="en">English (US/UK)</option>
+          <option value="hi">Hindi (हिंदी)</option>
+          <option value="ar">Arabic (عربي)</option>
+          <option value="auto">Auto Detect</option>
+        </select>
+      </div>
+      
+      <div id="localModelDiv">
+        <label>Local AI Model (Accuracy vs Speed)</label>
+        <select id="modelSelect">
+          <option value="base">Base (Fast - 10 Sec)</option>
+          <option value="small">Small (Better Urdu)</option>
+          <option value="medium" selected>Medium (Best Exact Text - 1 Min+)</option>
+        </select>
+      </div>
+      
+      <div class="checkbox-wrap">
+        <input type="checkbox" id="wantSummary" />
+        <label for="wantSummary" style="margin:0; cursor:pointer; color:var(--text);">AI Summary (Local Ollama)</label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="startBtn" class="btn-primary" onclick="startJob()">🚀 Start Transcription</button>
+      <button id="cancelBtn" class="btn-danger" onclick="cancelJob()" style="display:none;">⏹️ Cancel Job</button>
+      <a id="downloadBtn" class="btn-link btn-success" href="#" style="display:none;">📥 Download Transcript (.txt)</a>
+    </div>
+  </div>
+
+  <div id="progressCard" class="card" style="display:none;">
+    <div class="meta-info">
+      <span id="jobStatusText" style="font-weight: bold; color: var(--primary);">Processing...</span>
+      <span id="jobTimeText">0 sec</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div id="progressFill" class="progress-bar-fill"></div>
+    </div>
+    <div class="meta-info">
+      <span id="currentFileText">Waiting...</span>
+      <span id="etaText"></span>
+    </div>
+  </div>
+
+  <div id="resultsContainer"></div>
+
+<script>
+  let selectedFiles = [];
+  let activeJobId = null;
+  let pollTimer = null;
+  let resultsCount = 0;
+  let isCloudRunning = false;
+  let shouldCancelCloud = false;
+  let completedTranscripts = [];
+
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const selectedCount = document.getElementById('selectedCount');
+  const apiKeyInput = document.getElementById('apiKey');
+
+  // Load saved API key from localStorage
+  const savedKey = localStorage.getItem('vtt_cloud_api_key');
+  if (savedKey) {
+    apiKeyInput.value = savedKey;
+  }
+  apiKeyInput.addEventListener('input', () => {
+    localStorage.setItem('vtt_cloud_api_key', apiKeyInput.value.trim());
+  });
+
+  function toggleMode() {
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    document.getElementById('apiBox').style.display = mode === 'cloud' ? 'block' : 'none';
+    
+    const localModelDiv = document.getElementById('localModelDiv');
+    if(mode === 'cloud') {
+      localModelDiv.style.opacity = '0.3';
+      localModelDiv.style.pointerEvents = 'none';
+    } else {
+      localModelDiv.style.opacity = '1';
+      localModelDiv.style.pointerEvents = 'auto';
+    }
+  }
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      selectedFiles = Array.from(e.dataTransfer.files);
+      updateFileCount();
+    }
+  });
+  
+  fileInput.addEventListener('change', () => {
+    selectedFiles = Array.from(fileInput.files);
+    updateFileCount();
+  });
+
+  function updateFileCount() {
+    selectedCount.textContent = selectedFiles.length ? `✅ ${selectedFiles.length} file(s) ready to process` : '';
+  }
+
+  async function checkHealth() {
+    try {
+      const r = await fetch('/api/health');
+      const d = await r.json();
+      const bar = document.getElementById('healthBar');
+      
+      const isVercel = d.platform === 'vercel' || (!d.cli_found && !d.ffmpeg_found);
+      
+      if (isVercel) {
+        bar.innerHTML = `
+          <span class="badge ok">⚡ Vercel Serverless Ready</span>
+          <span class="badge ok">☁️ Cloud APIs: Groq/OpenAI Fast Turbo</span>
+        `;
+        // Switch to cloud mode by default on Vercel
+        const cloudRadio = document.querySelector('input[name="mode"][value="cloud"]');
+        if (cloudRadio) {
+          cloudRadio.checked = true;
+          toggleMode();
+        }
+        // Disable local radio with clear note
+        const localRadio = document.querySelector('input[name="mode"][value="local"]');
+        if (localRadio) {
+          localRadio.disabled = true;
+          localRadio.parentElement.title = "Local CPU mode is only available when running on your own PC";
+          localRadio.parentElement.style.opacity = "0.5";
+        }
+      } else {
+        bar.innerHTML = `
+          <span class="badge ${d.cli_found ? 'ok' : 'err'}">Whisper CLI: ${d.cli_found ? 'Installed' : 'Missing'}</span>
+          <span class="badge ${d.ffmpeg_found ? 'ok' : 'err'}">FFmpeg: ${d.ffmpeg_found ? 'Installed' : 'Missing'}</span>
+          <span class="badge ok">Cloud APIs: Ready</span>
+        `;
+      }
+    } catch (e) {
+      console.warn("Health check error:", e);
+      // Fallback for Vercel if health endpoint takes a moment
+      const cloudRadio = document.querySelector('input[name="mode"][value="cloud"]');
+      if (cloudRadio) {
+        cloudRadio.checked = true;
+        toggleMode();
+      }
+    }
+  }
+
+  async function startJob() {
+    if (!selectedFiles.length) { alert('Please select an audio file first!'); return; }
+    
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    const apiKey = document.getElementById('apiKey').value.trim();
+    
+    if (mode === 'cloud' && !apiKey) {
+      alert('Cloud mode requires an API Key! Please enter your free Groq (console.groq.com) or OpenAI key.');
+      document.getElementById('apiKey').focus();
+      return;
+    }
+
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('resultsContainer').innerHTML = '';
+    document.getElementById('downloadBtn').style.display = 'none';
+    completedTranscripts = [];
+
+    if (mode === 'cloud') {
+      await runCloudProcessing(apiKey);
+      return;
+    }
+
+    // Local CPU queue mode
+    const fd = new FormData();
+    selectedFiles.forEach(f => fd.append('files', f));
+    fd.append('language', document.getElementById('language').value);
+    fd.append('model', document.getElementById('modelSelect').value);
+    fd.append('want_summary', document.getElementById('wantSummary').checked);
+    fd.append('mode', mode);
+
+    resultsCount = 0;
+
+    try {
+      const r = await fetch('/api/jobs', { method: 'POST', body: fd });
+      const data = await r.json();
+      if (!r.ok) { alert(data.error || 'Job failed to start'); document.getElementById('startBtn').disabled = false; return; }
+      activeJobId = data.job_id;
+      document.getElementById('progressCard').style.display = 'block';
+      document.getElementById('cancelBtn').style.display = 'inline-flex';
+      pollJob();
+    } catch (e) {
+      alert('Server error: ' + e.message);
+      document.getElementById('startBtn').disabled = false;
+    }
+  }
+
+  async function runCloudProcessing(apiKey) {
+    isCloudRunning = true;
+    shouldCancelCloud = false;
+    const progressCard = document.getElementById('progressCard');
+    const progressFill = document.getElementById('progressFill');
+    const jobStatusText = document.getElementById('jobStatusText');
+    const currentFileText = document.getElementById('currentFileText');
+    const jobTimeText = document.getElementById('jobTimeText');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    progressCard.style.display = 'block';
+    cancelBtn.style.display = 'inline-flex';
+
+    const startTime = Date.now();
+    const timerInterval = setInterval(() => {
+      if (!isCloudRunning) { clearInterval(timerInterval); return; }
+      const sec = Math.floor((Date.now() - startTime) / 1000);
+      jobTimeText.textContent = `${sec} sec`;
+    }, 1000);
+
+    const total = selectedFiles.length;
+    let done = 0;
+    let errors = 0;
+
+    for (let i = 0; i < total; i++) {
+      if (shouldCancelCloud) {
+        jobStatusText.textContent = "Cancelled by user";
+        break;
+      }
+
+      const file = selectedFiles[i];
+      currentFileText.textContent = `Processing: ${file.name} (${i + 1}/${total})...`;
+      jobStatusText.textContent = `Progress: ${done}/${total} completed`;
+
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('language', document.getElementById('language').value);
+      fd.append('api_provider', document.getElementById('apiProvider').value);
+      fd.append('api_key', apiKey);
+      fd.append('want_summary', document.getElementById('wantSummary').checked);
+
+      try {
+        const res = await fetch('/api/transcribe', { method: 'POST', body: fd });
+        const data = await res.json();
+
+        if (res.ok && data.status === 'ok') {
+          appendResult({
+            index: i,
+            filename: file.name,
+            text: data.text,
+            took_sec: data.took_sec,
+            duration: data.duration,
+            language: data.language,
+            summary: data.summary,
+            status: 'ok'
+          });
+          completedTranscripts.push({ name: file.name, text: data.text, summary: data.summary });
+        } else {
+          errors++;
+          appendResult({
+            index: i,
+            filename: file.name,
+            error: data.error || 'Failed to transcribe',
+            status: 'error'
+          });
+        }
+      } catch (err) {
+        errors++;
+        appendResult({
+          index: i,
+          filename: file.name,
+          error: err.message,
+          status: 'error'
+        });
+      }
+
+      done++;
+      const pct = Math.round((done / total) * 100);
+      progressFill.style.width = pct + '%';
+      jobStatusText.textContent = `Status: ${done}/${total} files done (${errors} errors)`;
+    }
+
+    isCloudRunning = false;
+    currentFileText.textContent = shouldCancelCloud ? 'Operation cancelled' : 'All files processed!';
+    document.getElementById('startBtn').disabled = false;
+    cancelBtn.style.display = 'none';
+
+    if (completedTranscripts.length > 0) {
+      setupDownloadBlob();
+    }
+  }
+
+  function setupDownloadBlob() {
+    let combined = "";
+    completedTranscripts.forEach(item => {
+      combined += `===== ${item.name} =====\n`;
+      combined += (item.text || "(koi awaaz nahi mili)") + "\n";
+      if (item.summary) {
+        combined += `\n[Khulasa]: ${item.summary}\n`;
+      }
+      combined += "\n";
+    });
+
+    const blob = new Blob([combined], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const dl = document.getElementById('downloadBtn');
+    dl.href = url;
+    dl.download = `transcripts_${Date.now()}.txt`;
+    dl.style.display = 'inline-flex';
+  }
+
+  async function pollJob() {
+    if (!activeJobId) return;
+    try {
+      const r = await fetch(`/api/jobs/${activeJobId}?after=${resultsCount}`);
+      const d = await r.json();
+      if (!r.ok) return;
+
+      const pct = d.total ? Math.round((d.done / d.total) * 100) : 0;
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('jobStatusText').textContent = `Status: ${d.status.toUpperCase()} (${d.done}/${d.total} files, ${d.errors} errors)`;
+      document.getElementById('jobTimeText').textContent = `Elapsed: ${d.elapsed_sec}s`;
+      document.getElementById('currentFileText').textContent = d.current ? `Processing: ${d.current}` : (d.status === 'done' ? 'All files completed!' : '');
+      document.getElementById('etaText').textContent = d.eta_text ? `ETA: ~${d.eta_text}` : '';
+
+      if (d.results && d.results.length) {
+        d.results.forEach(appendResult);
+        resultsCount += d.results.length;
+      }
+
+      if (d.status === 'done' || d.status === 'cancelled') {
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('cancelBtn').style.display = 'none';
+        if (d.download_url) {
+          const dl = document.getElementById('downloadBtn');
+          dl.href = d.download_url;
+          dl.style.display = 'inline-flex';
+        }
+        return;
+      }
+      pollTimer = setTimeout(pollJob, 1000);
+    } catch (e) { pollTimer = setTimeout(pollJob, 2000); }
+  }
+
+  function appendResult(item) {
+    const container = document.getElementById('resultsContainer');
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    const lang = document.getElementById('language').value;
+    const isRtl = ['ur', 'ar'].includes(lang) || ['ur', 'ar'].includes(item.language);
+
+    if (item.status === 'error') {
+      div.innerHTML = `
+        <div class="result-head"><strong>#${item.index + 1} - ${item.filename}</strong><span style="color:var(--danger)">Failed</span></div>
+        <div style="color: var(--danger); font-size: 0.9rem; direction: ltr;">❌ ${item.error}</div>
+      `;
+    } else {
+      const safeText = (item.text || '(No speech detected)').replace(/</g, '&lt;');
+      let summaryHtml = '';
+      if (item.summary) {
+        summaryHtml = `<div style="margin-top:12px; padding:10px 14px; background:rgba(59,130,246,0.1); border-left:3px solid var(--primary); border-radius:6px; font-size:0.95rem; color:#93c5fd; direction:ltr; text-align:left;"><strong>📝 AI Summary:</strong> ${item.summary}</div>`;
+      }
+
+      div.innerHTML = `
+        <div class="result-head">
+          <strong>#${item.index + 1} - ${item.filename}</strong>
+          <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+            <span style="color: var(--success); font-weight: 600;">⏱️ API Took: ${item.took_sec}s</span>
+            <span>Audio Length: ${item.duration || ''}</span>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText(this.dataset.txt); this.innerText='Copied!';" data-txt="${safeText.replace(/"/g, '&quot;')}">Copy Text</button>
+          </div>
+        </div>
+        <div class="result-text ${isRtl ? '' : 'ltr'}">${safeText}</div>
+        ${summaryHtml}
+      `;
+    }
+    container.prepend(div);
+  }
+
+  async function cancelJob() {
+    if (isCloudRunning) {
+      shouldCancelCloud = true;
+      document.getElementById('currentFileText').textContent = "Cancelling...";
+      return;
+    }
+    if (activeJobId) {
+      await fetch(`/api/jobs/${activeJobId}/cancel`, { method: 'POST' });
+    }
+  }
+
+  checkHealth();
+</script>
+</body>
+</html>

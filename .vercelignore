@@ -1,0 +1,27 @@
+# Heavy model files & local binaries
+models/
+whisper_bin/
+*.bin
+*.exe
+*.dll
+
+# Virtual environments & cache
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Local audio test files & outputs
+test_audio/
+test_batch500/
+transcripts/
+
+# Local batch scripts
+*.bat
+*.bat.txt
+keep_alive.bat
+fix_project.bat
+download_model.py
+stress_test.py
+test_medium_api.py
+test_single.py

@@ -1,0 +1,15 @@
+models/
+whisper_bin/
+*.bin
+*.exe
+*.dll
+venv/
+.venv/
+__pycache__/
+*.pyc
+test_audio/
+test_batch500/
+transcripts/
+*.bat
+*.bat.txt
+.vercel/
