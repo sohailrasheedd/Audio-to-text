@@ -13,6 +13,7 @@
       --success: #10b981;
       --danger: #ef4444;
       --warning: #f59e0b;
+      --purple: #8b5cf6;
       --gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
       --radius-sm: 8px;
       --radius-md: 12px;
@@ -29,7 +30,7 @@
       --muted: #94a3b8;
       --input-bg: #0f172a;
       --dropzone-bg: rgba(15, 23, 42, 0.6);
-      --dropzone-hover: rgba(59, 130, 246, 0.12);
+      --dropzone-hover: rgba(59, 130, 246, 0.15);
       --notice-warn-bg: rgba(245, 158, 11, 0.12);
       --notice-warn-border: #f59e0b;
       --notice-warn-text: #fef08a;
@@ -38,8 +39,11 @@
       --notice-info-text: #bfdbfe;
       --theme-btn-bg: #1e293b;
       --theme-btn-border: #334155;
-      --summary-bg: rgba(59, 130, 246, 0.12);
-      --summary-text: #93c5fd;
+      --summary-bg: rgba(59, 130, 246, 0.1);
+      --summary-border: #3b82f6;
+      --summary-text: #e2e8f0;
+      --history-item-bg: #0f172a;
+      --timestamp-badge: #1e293b;
     }
 
     [data-theme="light"] {
@@ -60,8 +64,11 @@
       --notice-info-text: #1e40af;
       --theme-btn-bg: #ffffff;
       --theme-btn-border: #cbd5e1;
-      --summary-bg: #eff6ff;
-      --summary-text: #1e40af;
+      --summary-bg: #f0fdf4;
+      --summary-border: #10b981;
+      --summary-text: #064e3b;
+      --history-item-bg: #f8fafc;
+      --timestamp-badge: #e2e8f0;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -151,7 +158,7 @@
       transition: var(--transition);
     }
 
-    /* DROP ZONE */
+    /* DROP ZONE WITH SMOOTH ANIMATION */
     .drop-zone {
       border: 2px dashed var(--border);
       border-radius: var(--radius-md);
@@ -159,13 +166,19 @@
       text-align: center;
       cursor: pointer;
       transition: var(--transition);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       background: var(--dropzone-bg);
+      position: relative;
     }
-    .drop-zone:hover, .drop-zone.dragover {
+    .drop-zone:hover {
       border-color: var(--primary);
       background: var(--dropzone-hover);
-      transform: scale(1.005);
+    }
+    .drop-zone.dragover {
+      border-color: var(--primary);
+      background: var(--dropzone-hover);
+      transform: scale(1.01);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
     }
     .drop-zone-title {
       font-size: clamp(1.05rem, 2.5vw, 1.25rem);
@@ -180,6 +193,62 @@
       margin-top: 12px;
       color: var(--primary);
       font-weight: 700;
+      font-size: 1rem;
+    }
+
+    /* LIVE MIC RECORDING BAR */
+    .mic-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 14px 16px;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+    }
+    .btn-mic {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-mic:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+    .btn-mic.recording {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--danger);
+      color: var(--danger);
+      animation: micPulse 1.5s infinite;
+    }
+    @keyframes micPulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .mic-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--danger);
+    }
+    .mic-timer {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--danger);
       font-size: 1rem;
     }
 
@@ -262,9 +331,7 @@
       transition: var(--transition);
       user-select: none;
     }
-    .radio-label:hover {
-      border-color: var(--primary);
-    }
+    .radio-label:hover { border-color: var(--primary); }
     .radio-label input[type="radio"] {
       width: 18px;
       height: 18px;
@@ -334,18 +401,18 @@
     /* BUTTONS */
     .btn-row {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
       margin-top: 10px;
     }
     button, .btn-link {
-      min-height: 46px;
-      padding: 12px 24px;
+      min-height: 44px;
+      padding: 10px 20px;
       border-radius: var(--radius-sm);
       border: none;
       font-weight: 700;
       cursor: pointer;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
@@ -375,6 +442,8 @@
     }
     .btn-danger { background: var(--danger); color: white; }
     .btn-success { background: var(--success); color: white; }
+    .btn-secondary { background: var(--card-inner); border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--primary); }
 
     /* PROGRESS CARD */
     .progress-bar-bg {
@@ -401,6 +470,16 @@
       gap: 8px;
     }
 
+    /* GLOBAL EXPORT TOOLBAR */
+    .export-toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
     /* RESULTS SECTION */
     .result-item {
       background: var(--card);
@@ -424,7 +503,7 @@
     }
     .result-badges {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
       flex-wrap: wrap;
     }
@@ -442,34 +521,140 @@
       direction: ltr;
       text-align: left;
     }
-    .copy-btn {
-      min-height: 32px;
-      background: transparent;
+
+    /* SEGMENTS & TIMESTAMPS VIEW */
+    .segments-container {
+      margin-top: 14px;
+      padding: 12px;
+      background: var(--card-inner);
+      border-radius: var(--radius-sm);
       border: 1px solid var(--border);
-      color: var(--text);
-      padding: 4px 12px;
+      max-height: 250px;
+      overflow-y: auto;
+      font-size: 0.92rem;
+    }
+    .segment-row {
+      display: flex;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border);
+      align-items: baseline;
+    }
+    .segment-row:last-child { border-bottom: none; }
+    .time-tag {
+      font-family: monospace;
       font-size: 0.8rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--timestamp-badge);
+      color: var(--primary);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    /* ACTION BUTTONS ON RESULT CARD */
+    .action-btn-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .small-btn {
+      min-height: 32px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
       font-weight: 600;
       border-radius: 6px;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      color: var(--text);
       cursor: pointer;
       transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .copy-btn:hover {
-      background: var(--card-inner);
+    .small-btn:hover {
       border-color: var(--primary);
+      color: var(--primary);
     }
-    .summary-box {
+
+    /* AI SUMMARY & ACTION ITEMS CARD */
+    .summary-card {
       margin-top: 14px;
-      padding: 12px 16px;
+      padding: 16px;
       background: var(--summary-bg);
-      border-left: 4px solid var(--primary);
-      border-radius: 6px;
+      border-left: 4px solid var(--summary-border);
+      border-radius: var(--radius-sm);
       font-size: 0.95rem;
       color: var(--summary-text);
       direction: ltr;
       text-align: left;
       line-height: 1.6;
       word-break: break-word;
+    }
+    .summary-card h4 {
+      margin-bottom: 8px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 1rem;
+    }
+    .action-items-list {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+    .action-items-list li {
+      margin-bottom: 6px;
+    }
+
+    /* HISTORY DRAWER / CARD */
+    .history-card {
+      margin-top: 24px;
+      border-top: 2px dashed var(--border);
+      padding-top: 20px;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 12px;
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+    .history-item {
+      padding: 12px 14px;
+      background: var(--history-item-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .history-meta {
+      flex: 1;
+      min-width: 200px;
+    }
+    .history-meta strong {
+      font-size: 0.92rem;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .history-meta span {
+      font-size: 0.8rem;
+      color: var(--muted);
     }
   </style>
 </head>
@@ -479,7 +664,7 @@
   <header class="top-header">
     <div class="header-text">
       <h1>🎙️ Voice to Text PRO</h1>
-      <p class="subtitle">Hybrid Engine: Offline Local CPU & Ultra-Fast Cloud Whisper API</p>
+      <p class="subtitle">Hybrid Cloud & Local Engine • Subtitles (.SRT/.VTT) • Live Mic • AI Actions</p>
     </div>
     <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="Switch Light/Dark Mode">
       <span id="themeIcon">🌙</span> <span id="themeLabel">Dark</span>
@@ -498,6 +683,19 @@
       <p class="drop-zone-subtitle">Supports WhatsApp Voice Notes (.opus, .ogg), MP3, M4A, WAV, FLAC, AMR, MP4</p>
       <input type="file" id="fileInput" multiple accept="audio/*,video/*,.opus,.ogg,.m4a,.mp3,.wav,.flac,.aac,.amr" style="display:none" />
       <p id="selectedCount"></p>
+    </div>
+
+    <!-- DIRECT LIVE MIC RECORDING BAR -->
+    <div class="mic-bar">
+      <button id="micBtn" class="btn-mic" onclick="toggleMicRecording()">
+        <span id="micIcon">🎙️</span>
+        <span id="micLabel">Record from Mic</span>
+      </button>
+      <div id="micStatus" style="display:none; align-items:center; gap:8px;">
+        <span class="mic-indicator"></span>
+        <span id="micTimer" class="mic-timer">00:00</span>
+        <span style="font-size:0.85rem; color:var(--muted);">Speaking... click button to finish</span>
+      </div>
     </div>
 
     <div class="controls">
@@ -586,10 +784,10 @@
         </select>
       </div>
       
-      <!-- AI SUMMARY CHECKBOX -->
+      <!-- AI SUMMARY & ACTION ITEMS CHECKBOX -->
       <div class="checkbox-wrap">
-        <input type="checkbox" id="wantSummary" />
-        <label for="wantSummary" style="margin:0; cursor:pointer; font-weight: 600;">✨ Generate AI Summary</label>
+        <input type="checkbox" id="wantSummary" checked />
+        <label for="wantSummary" style="margin:0; cursor:pointer; font-weight: 600;">✨ AI Summary & Action Items</label>
       </div>
     </div>
 
@@ -597,11 +795,10 @@
     <div class="btn-row">
       <button id="startBtn" class="btn-primary" onclick="startJob()">🚀 Start Transcription</button>
       <button id="cancelBtn" class="btn-danger" onclick="cancelJob()" style="display:none;">⏹️ Cancel</button>
-      <a id="downloadBtn" class="btn-link btn-success" href="#" style="display:none;">📥 Download All (.txt)</a>
     </div>
   </main>
 
-  <!-- LIVE PROGRESS CARD -->
+  <!-- LIVE PROGRESS CARD & GLOBAL DOWNLOAD TOOLBAR -->
   <section id="progressCard" class="card" style="display:none;">
     <div class="meta-info">
       <span id="jobStatusText" style="font-weight: 700; color: var(--primary);">Processing...</span>
@@ -614,10 +811,38 @@
       <span id="currentFileText">Waiting...</span>
       <span id="etaText"></span>
     </div>
+
+    <!-- BATCH EXPORTS (.TXT, .SRT, .VTT) -->
+    <div id="globalExportBar" class="export-toolbar" style="display:none;">
+      <span style="font-weight:700; font-size:0.85rem; align-self:center; margin-right:4px;">📥 Export All:</span>
+      <button class="small-btn" onclick="exportCombined('txt')">📄 Plain Text (.txt)</button>
+      <button class="small-btn" onclick="exportCombined('srt')">🎬 Subtitles (.srt)</button>
+      <button class="small-btn" onclick="exportCombined('vtt')">🌐 WebVTT (.vtt)</button>
+    </div>
   </section>
 
   <!-- RESULTS CONTAINER -->
   <section id="resultsContainer"></section>
+
+  <!-- LOCAL STORAGE TRANSCRIPTION HISTORY -->
+  <section class="card history-card" id="historySection">
+    <div class="history-header" onclick="toggleHistoryDrawer()">
+      <h3 style="font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+        <span>📜 Transcription History</span>
+        <span id="historyCountBadge" class="badge info" style="font-size:0.75rem;">0 saved</span>
+      </h3>
+      <span id="historyToggleIcon" style="font-size:0.9rem; color:var(--muted);">▼ Show</span>
+    </div>
+    <div id="historyDrawer" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:0.82rem; color:var(--muted);">Stored securely in your browser's localStorage</span>
+        <button class="small-btn" onclick="clearAllHistory()" style="color:var(--danger);">🗑️ Clear History</button>
+      </div>
+      <div id="historyList" class="history-list">
+        <p style="font-size:0.88rem; color:var(--muted); text-align:center; padding:12px;">No past transcriptions found.</p>
+      </div>
+    </div>
+  </section>
 
 <script>
   let selectedFiles = [];
@@ -629,13 +854,20 @@
   let completedTranscripts = [];
   let isServerlessEnvironment = false;
 
+  // MediaRecorder State
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let micTimerInterval = null;
+  let micStartTime = 0;
+  let isRecording = false;
+
   const dropZone = document.getElementById('dropZone');
   const fileInput = document.getElementById('fileInput');
   const selectedCount = document.getElementById('selectedCount');
   const apiKeyInput = document.getElementById('apiKey');
 
   // ==========================================
-  // THEME MANAGEMENT (DARK & LIGHT)
+  // 1. THEME MANAGEMENT (DARK & LIGHT)
   // ==========================================
   function initTheme() {
     const savedTheme = localStorage.getItem('vtt_theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -661,17 +893,15 @@
     applyTheme(current === 'dark' ? 'light' : 'dark');
   }
 
-  // Load saved API key from localStorage
+  // API Key Persistence
   const savedKey = localStorage.getItem('vtt_cloud_api_key');
-  if (savedKey) {
-    apiKeyInput.value = savedKey;
-  }
+  if (savedKey) apiKeyInput.value = savedKey;
   apiKeyInput.addEventListener('input', () => {
     localStorage.setItem('vtt_cloud_api_key', apiKeyInput.value.trim());
   });
 
   // ==========================================
-  // MODE SELECTION & INTERACTIVE NOTICES
+  // 2. MODE SELECTION & INTERACTIVE NOTICES
   // ==========================================
   function toggleMode() {
     const mode = document.querySelector('input[name="mode"]:checked').value;
@@ -693,16 +923,94 @@
       localModelDiv.style.opacity = '1';
       localModelDiv.style.pointerEvents = 'auto';
 
-      // Check if user is on mobile or online on Vercel
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 640;
       if (isMobile || isServerlessEnvironment) {
-        // Scroll smoothly to warning so user notices immediately
         localNotice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }
   }
 
-  // File Drop / Selection events
+  // ==========================================
+  // 3. DIRECT LIVE MIC AUDIO RECORDING
+  // ==========================================
+  async function toggleMicRecording() {
+    if (!isRecording) {
+      await startMicRecording();
+    } else {
+      stopMicRecording();
+    }
+  }
+
+  async function startMicRecording() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Microphone recording is not supported on this browser.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      let mimeType = 'audio/webm;codecs=opus';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/webm';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
+
+      recordedChunks = [];
+      mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(track => track.stop());
+        const blob = new Blob(recordedChunks, { type: mimeType || 'audio/webm' });
+        const ext = (mimeType && mimeType.includes('mp4')) ? 'mp4' : 'webm';
+        const recordedFile = new File([blob], `mic_recording_${Date.now()}.${ext}`, { type: blob.type });
+
+        selectedFiles.push(recordedFile);
+        updateFileCount();
+
+        // UI Reset
+        isRecording = false;
+        clearInterval(micTimerInterval);
+        document.getElementById('micBtn').classList.remove('recording');
+        document.getElementById('micIcon').textContent = '🎙️';
+        document.getElementById('micLabel').textContent = 'Record from Mic';
+        document.getElementById('micStatus').style.display = 'none';
+      };
+
+      mediaRecorder.start(250);
+      isRecording = true;
+      micStartTime = Date.now();
+
+      // UI Update
+      const micBtn = document.getElementById('micBtn');
+      micBtn.classList.add('recording');
+      document.getElementById('micIcon').textContent = '⏹️';
+      document.getElementById('micLabel').textContent = 'Stop Recording';
+      document.getElementById('micStatus').style.display = 'inline-flex';
+
+      micTimerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - micStartTime) / 1000);
+        const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const s = String(elapsed % 60).padStart(2, '0');
+        document.getElementById('micTimer').textContent = `${m}:${s}`;
+      }, 1000);
+
+    } catch (err) {
+      alert("Microphone access denied or error: " + err.message);
+    }
+  }
+
+  function stopMicRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+  }
+
+  // ==========================================
+  // 4. DRAG & DROP AND FILE SELECTION
+  // ==========================================
   dropZone.addEventListener('click', () => fileInput.click());
   dropZone.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -711,8 +1019,11 @@
     }
   });
 
-  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-  dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
   dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('dragover');
@@ -732,7 +1043,7 @@
   }
 
   // ==========================================
-  // SYSTEM HEALTH CHECK
+  // 5. SYSTEM HEALTH CHECK
   // ==========================================
   async function checkHealth() {
     try {
@@ -748,12 +1059,8 @@
           <span class="badge ok">⚡ Vercel Cloud Serverless Live</span>
           <span class="badge info">☁️ Cloud Turbo: Groq / OpenAI Whisper Ready</span>
         `;
-        // Default to cloud mode on Vercel
         const cloudRadio = document.querySelector('input[name="mode"][value="cloud"]');
-        if (cloudRadio) {
-          cloudRadio.checked = true;
-          toggleMode();
-        }
+        if (cloudRadio) { cloudRadio.checked = true; toggleMode(); }
       } else {
         bar.innerHTML = `
           <span class="badge ${d.cli_found ? 'ok' : 'err'}">Whisper CLI: ${d.cli_found ? 'Ready' : 'Not Found'}</span>
@@ -771,26 +1078,22 @@
         `;
       }
       const cloudRadio = document.querySelector('input[name="mode"][value="cloud"]');
-      if (cloudRadio) {
-        cloudRadio.checked = true;
-        toggleMode();
-      }
+      if (cloudRadio) { cloudRadio.checked = true; toggleMode(); }
     }
   }
 
   // ==========================================
-  // JOB EXECUTION (START & VALIDATE)
+  // 6. JOB EXECUTION
   // ==========================================
   async function startJob() {
     if (!selectedFiles.length) {
-      alert('Please select or drop an audio file first!');
+      alert('Please select, drop, or record an audio file first!');
       return;
     }
     
     const mode = document.querySelector('input[name="mode"]:checked').value;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 640;
 
-    // Handle Local mode on mobile or cloud environments
     if (mode === 'local') {
       if (isMobile) {
         alert("⚠️ Local CPU Mode cannot run on Mobile Devices.\n\nPhones do not support desktop C++ executables. Please switch to 'Cloud Turbo API' for fast, direct transcription on your phone.");
@@ -807,7 +1110,6 @@
     }
 
     const apiKey = document.getElementById('apiKey').value.trim();
-    
     if (mode === 'cloud' && !apiKey) {
       alert('Cloud mode requires a free API Key! Please enter your Groq key from console.groq.com/keys.');
       document.getElementById('apiKey').focus();
@@ -816,7 +1118,7 @@
 
     document.getElementById('startBtn').disabled = true;
     document.getElementById('resultsContainer').innerHTML = '';
-    document.getElementById('downloadBtn').style.display = 'none';
+    document.getElementById('globalExportBar').style.display = 'none';
     completedTranscripts = [];
 
     if (mode === 'cloud') {
@@ -833,7 +1135,6 @@
     fd.append('mode', mode);
 
     resultsCount = 0;
-
     try {
       const r = await fetch('/api/jobs', { method: 'POST', body: fd });
       const data = await r.json();
@@ -853,7 +1154,7 @@
   }
 
   // ==========================================
-  // CLOUD PROCESSING ENGINE
+  // 7. CLOUD PROCESSING ENGINE
   // ==========================================
   async function runCloudProcessing(apiKey) {
     isCloudRunning = true;
@@ -894,7 +1195,7 @@
       const wantSummary = document.getElementById('wantSummary').checked;
       let transcribedOk = false;
 
-      // 1. Direct browser call to Groq / OpenAI (Lightning fast, bypasses 4.5MB serverless limit)
+      // 1. Direct browser call to Groq / OpenAI (Full segments & no serverless limits)
       try {
         const directUrl = provider === 'openai'
           ? 'https://api.openai.com/v1/audio/transcriptions'
@@ -917,99 +1218,42 @@
         if (directRes.ok) {
           const directData = await directRes.json();
           const tookSec = ((Date.now() - directStart) / 1000).toFixed(1);
-          let summary = null;
+          let summaryData = null;
 
           if (wantSummary && provider === 'groq' && directData.text) {
-            try {
-              const sumRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  model: 'llama-3.3-70b-versatile',
-                  messages: [
-                    { role: 'system', content: 'Voice message ka Roman Urdu mein 1-2 jumlon mein khulasa likhein.' },
-                    { role: 'user', content: directData.text }
-                  ],
-                  max_tokens: 150
-                })
-              });
-              if (sumRes.ok) {
-                const sumData = await sumRes.json();
-                summary = sumData.choices?.[0]?.message?.content?.trim();
-              }
-            } catch(e) {}
+            summaryData = await requestAiSummary(directData.text, apiKey);
           }
 
-          appendResult({
+          const itemResult = {
             index: i,
             filename: file.name,
             text: directData.text,
             took_sec: tookSec,
             duration: directData.duration ? (Math.round(directData.duration) + 's') : '',
             language: directData.language || lang,
-            summary: summary,
-            status: 'ok'
-          });
-          completedTranscripts.push({ name: file.name, text: directData.text, summary: summary });
+            summary: summaryData,
+            segments: directData.segments || [],
+            status: 'ok',
+            date: new Date().toLocaleString()
+          };
+
+          appendResult(itemResult);
+          completedTranscripts.push(itemResult);
+          saveToHistory(itemResult);
           transcribedOk = true;
-        } else {
-          const errData = await directRes.json().catch(() => ({}));
-          console.warn("Direct API call responded with error:", errData);
         }
       } catch (directErr) {
-        console.warn("Direct browser call failed, trying serverless API fallback...", directErr);
+        // Fallback gracefully
       }
 
-      // 2. Serverless fallback if direct call did not succeed
       if (!transcribedOk) {
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('language', lang);
-        fd.append('api_provider', provider);
-        fd.append('api_key', apiKey);
-        fd.append('want_summary', wantSummary);
-
-        try {
-          const res = await fetch('/api/transcribe', { method: 'POST', body: fd });
-          const data = await res.json();
-
-          if (res.ok && data.status === 'ok') {
-            appendResult({
-              index: i,
-              filename: file.name,
-              text: data.text,
-              took_sec: data.took_sec,
-              duration: data.duration,
-              language: data.language,
-              summary: data.summary,
-              status: 'ok'
-            });
-            completedTranscripts.push({ name: file.name, text: data.text, summary: data.summary });
-            transcribedOk = true;
-          } else {
-            errors++;
-            let errMsg = data.error || 'Failed to transcribe audio.';
-            if (res.status === 401) {
-              errMsg = 'Invalid API Key. Please verify your key at console.groq.com/keys';
-            } else if (res.status === 413) {
-              errMsg = 'File is too large for server upload. Please use a clip under 25MB.';
-            }
-            appendResult({
-              index: i,
-              filename: file.name,
-              error: errMsg,
-              status: 'error'
-            });
-          }
-        } catch (err) {
-          errors++;
-          appendResult({
-            index: i,
-            filename: file.name,
-            error: 'Connection error: ' + err.message,
-            status: 'error'
-          });
-        }
+        errors++;
+        appendResult({
+          index: i,
+          filename: file.name,
+          error: "Failed to transcribe audio. Verify your API key or try another file.",
+          status: 'error'
+        });
       }
 
       done++;
@@ -1024,64 +1268,279 @@
     cancelBtn.style.display = 'none';
 
     if (completedTranscripts.length > 0) {
-      setupDownloadBlob();
+      document.getElementById('globalExportBar').style.display = 'flex';
     }
   }
 
-  // Build client-side combined .txt download
-  function setupDownloadBlob() {
-    let combined = "";
-    completedTranscripts.forEach(item => {
-      combined += `===== ${item.name} =====\n`;
-      combined += (item.text || "(koi awaaz nahi mili)") + "\n";
-      if (item.summary) {
-        combined += `\n[Khulasa]: ${item.summary}\n`;
+  // ==========================================
+  // 8. AI SUMMARY & ACTION ITEMS GENERATOR
+  // ==========================================
+  async function requestAiSummary(text, apiKey) {
+    if (!text || !apiKey) return null;
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an AI Executive Assistant. Analyze the provided voice transcript and generate: \n1. A concise 2-sentence summary (in Roman Urdu or English matching the audio tone).\n2. Key Bullet Points.\n3. Action Items & To-Dos with checkboxes [ ] (names, deadlines, amounts, tasks). Format in clean markdown.'
+            },
+            { role: 'user', content: text }
+          ],
+          max_tokens: 350
+        })
+      });
+      if (res.ok) {
+        const d = await res.json();
+        return d.choices?.[0]?.message?.content?.trim();
       }
-      combined += "\n";
-    });
-
-    const blob = new Blob([combined], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const dl = document.getElementById('downloadBtn');
-    dl.href = url;
-    dl.download = `transcripts_${Date.now()}.txt`;
-    dl.style.display = 'inline-flex';
+    } catch (e) {}
+    return null;
   }
 
-  // Local job polling
-  async function pollJob() {
-    if (!activeJobId) return;
-    try {
-      const r = await fetch(`/api/jobs/${activeJobId}?after=${resultsCount}`);
-      const d = await r.json();
-      if (!r.ok) return;
+  async function triggerManualSummary(index) {
+    const item = completedTranscripts.find(c => c.index === index);
+    if (!item || !item.text) return;
+    const apiKey = document.getElementById('apiKey').value.trim();
+    if (!apiKey) {
+      alert("Please enter your Groq API key to generate an AI summary.");
+      return;
+    }
 
-      const pct = d.total ? Math.round((d.done / d.total) * 100) : 0;
-      document.getElementById('progressFill').style.width = pct + '%';
-      document.getElementById('jobStatusText').textContent = `Status: ${d.status.toUpperCase()} (${d.done}/${d.total} files, ${d.errors} errors)`;
-      document.getElementById('jobTimeText').textContent = `Elapsed: ${d.elapsed_sec}s`;
-      document.getElementById('currentFileText').textContent = d.current ? `Processing: ${d.current}` : (d.status === 'done' ? 'All files completed!' : '');
-      document.getElementById('etaText').textContent = d.eta_text ? `ETA: ~${d.eta_text}` : '';
+    const summaryBox = document.getElementById(`summary-box-${index}`);
+    if (summaryBox) {
+      summaryBox.innerHTML = "<em>⏳ Generating AI Summary & Action Items with Llama 3.3...</em>";
+      summaryBox.style.display = "block";
+    }
 
-      if (d.results && d.results.length) {
-        d.results.forEach(appendResult);
-        resultsCount += d.results.length;
-      }
+    const summary = await requestAiSummary(item.text, apiKey);
+    item.summary = summary;
+    if (summaryBox) {
+      summaryBox.innerHTML = formatSummaryHtml(summary);
+    }
+    saveToHistory(item);
+  }
 
-      if (d.status === 'done' || d.status === 'cancelled') {
-        document.getElementById('startBtn').disabled = false;
-        document.getElementById('cancelBtn').style.display = 'none';
-        if (d.download_url) {
-          const dl = document.getElementById('downloadBtn');
-          dl.href = d.download_url;
-          dl.style.display = 'inline-flex';
+  function formatSummaryHtml(summaryText) {
+    if (!summaryText) return '';
+    // Format markdown bold and bullets cleanly
+    let html = summaryText
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[ \]/g, '☑️')
+      .replace(/\n- /g, '<br>• ')
+      .replace(/\n/g, '<br>');
+    return `
+      <h4>✨ AI Summary & Action Items</h4>
+      <div style="font-size:0.92rem; line-height:1.6;">${html}</div>
+      <button class="small-btn" onclick="navigator.clipboard.writeText(this.dataset.txt); this.innerText='Copied!';" data-txt="${summaryText.replace(/"/g, '&quot;')}" style="margin-top:8px;">📋 Copy Summary</button>
+    `;
+  }
+
+  // ==========================================
+  // 9. TIMESTAMPS & SUBTITLES (.SRT / .VTT)
+  // ==========================================
+  function formatSrtTime(seconds) {
+    seconds = Math.max(0, Number(seconds) || 0);
+    const pad = (num, size = 2) => String(Math.floor(num)).padStart(size, '0');
+    const h = pad(seconds / 3600);
+    const m = pad((seconds % 3600) / 60);
+    const s = pad(seconds % 60);
+    const ms = pad(Math.round((seconds % 1) * 1000), 3);
+    return `${h}:${m}:${s},${ms}`;
+  }
+
+  function formatVttTime(seconds) {
+    seconds = Math.max(0, Number(seconds) || 0);
+    const pad = (num, size = 2) => String(Math.floor(num)).padStart(size, '0');
+    const h = pad(seconds / 3600);
+    const m = pad((seconds % 3600) / 60);
+    const s = pad(seconds % 60);
+    const ms = pad(Math.round((seconds % 1) * 1000), 3);
+    return `${h}:${m}:${s}.${ms}`;
+  }
+
+  function generateSrt(segments, fallbackText = '') {
+    if (!segments || !segments.length) {
+      return `1\n00:00:00,000 --> 00:00:05,000\n${fallbackText || 'Voice note'}\n`;
+    }
+    return segments.map((seg, idx) => {
+      const start = seg.start ?? seg.start_sec ?? 0;
+      const end = seg.end ?? seg.end_sec ?? (start + 2);
+      return `${idx + 1}\n${formatSrtTime(start)} --> ${formatSrtTime(end)}\n${(seg.text || '').trim()}\n`;
+    }).join('\n');
+  }
+
+  function generateVtt(segments, fallbackText = '') {
+    let vtt = "WEBVTT\n\n";
+    if (!segments || !segments.length) {
+      return vtt + `00:00:00.000 --> 00:00:05.000\n${fallbackText || 'Voice note'}\n`;
+    }
+    return vtt + segments.map((seg, idx) => {
+      const start = seg.start ?? seg.start_sec ?? 0;
+      const end = seg.end ?? seg.end_sec ?? (start + 2);
+      return `${idx + 1}\n${formatVttTime(start)} --> ${formatVttTime(end)}\n${(seg.text || '').trim()}\n`;
+    }).join('\n');
+  }
+
+  function downloadFile(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function exportSingle(index, format) {
+    const item = completedTranscripts.find(c => c.index === index);
+    if (!item) return;
+    const stem = item.filename.replace(/\.[^/.]+$/, "");
+    if (format === 'txt') {
+      downloadFile(item.text || '', `${stem}_transcript.txt`, 'text/plain;charset=utf-8');
+    } else if (format === 'srt') {
+      downloadFile(generateSrt(item.segments, item.text), `${stem}_subtitles.srt`, 'text/plain;charset=utf-8');
+    } else if (format === 'vtt') {
+      downloadFile(generateVtt(item.segments, item.text), `${stem}_subtitles.vtt`, 'text/vtt;charset=utf-8');
+    }
+  }
+
+  function exportCombined(format) {
+    if (!completedTranscripts.length) return;
+    const now = Date.now();
+    if (format === 'txt') {
+      let combined = "";
+      completedTranscripts.forEach(item => {
+        combined += `===== ${item.filename} =====\n${item.text || ''}\n`;
+        if (item.summary) combined += `\n[AI Summary]:\n${item.summary}\n`;
+        combined += "\n";
+      });
+      downloadFile(combined, `all_transcripts_${now}.txt`, 'text/plain;charset=utf-8');
+    } else if (format === 'srt') {
+      let combinedSrt = "";
+      let count = 1;
+      completedTranscripts.forEach(item => {
+        const segs = item.segments || [];
+        if (!segs.length) {
+          combinedSrt += `${count++}\n00:00:00,000 --> 00:00:05,000\n[${item.filename}]: ${item.text || ''}\n\n`;
+        } else {
+          segs.forEach(s => {
+            combinedSrt += `${count++}\n${formatSrtTime(s.start)} --> ${formatSrtTime(s.end)}\n${(s.text || '').trim()}\n\n`;
+          });
         }
+      });
+      downloadFile(combinedSrt, `all_subtitles_${now}.srt`, 'text/plain;charset=utf-8');
+    } else if (format === 'vtt') {
+      let combinedVtt = "WEBVTT\n\n";
+      let count = 1;
+      completedTranscripts.forEach(item => {
+        const segs = item.segments || [];
+        if (!segs.length) {
+          combinedVtt += `${count++}\n00:00:00.000 --> 00:00:05.000\n[${item.filename}]: ${item.text || ''}\n\n`;
+        } else {
+          segs.forEach(s => {
+            combinedVtt += `${count++}\n${formatVttTime(s.start)} --> ${formatVttTime(s.end)}\n${(s.text || '').trim()}\n\n`;
+          });
+        }
+      });
+      downloadFile(combinedVtt, `all_subtitles_${now}.vtt`, 'text/vtt;charset=utf-8');
+    }
+  }
+
+  // ==========================================
+  // 10. LOCAL STORAGE TRANSCRIPTION HISTORY
+  // ==========================================
+  function saveToHistory(item) {
+    if (!item || !item.text) return;
+    try {
+      let history = JSON.parse(localStorage.getItem('vtt_transcription_history') || '[]');
+      // Avoid duplicate filenames in recent history
+      history = history.filter(h => h.filename !== item.filename || (Date.now() - (h.timestamp || 0) > 60000));
+      history.unshift({
+        id: 'hist_' + Date.now(),
+        filename: item.filename,
+        text: item.text,
+        duration: item.duration || '',
+        took_sec: item.took_sec || '',
+        language: item.language || 'ur',
+        summary: item.summary || null,
+        segments: item.segments || [],
+        timestamp: Date.now(),
+        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      // Cap at 30 items
+      if (history.length > 30) history.pop();
+      localStorage.setItem('vtt_transcription_history', JSON.stringify(history));
+      renderHistory();
+    } catch (e) {}
+  }
+
+  function renderHistory() {
+    try {
+      const history = JSON.parse(localStorage.getItem('vtt_transcription_history') || '[]');
+      const badge = document.getElementById('historyCountBadge');
+      const list = document.getElementById('historyList');
+      badge.textContent = `${history.length} saved`;
+
+      if (!history.length) {
+        list.innerHTML = `<p style="font-size:0.88rem; color:var(--muted); text-align:center; padding:12px;">No past transcriptions found.</p>`;
         return;
       }
-      pollTimer = setTimeout(pollJob, 1000);
-    } catch (e) { pollTimer = setTimeout(pollJob, 2000); }
+
+      list.innerHTML = history.map((h, i) => `
+        <div class="history-item">
+          <div class="history-meta">
+            <strong>${h.filename}</strong>
+            <span>📅 ${h.date} • ${h.duration ? '⏱️ ' + h.duration : ''}</span>
+            <div style="font-size:0.85rem; color:var(--text); margin-top:4px; max-height:40px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:${['ur','ar'].includes(h.language)?'rtl':'ltr'};">
+              ${(h.text || '').slice(0, 120)}...
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="small-btn" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(h.text)}')); this.innerText='Copied!';">📋 Copy</button>
+            <button class="small-btn" onclick="downloadFile(decodeURIComponent('${encodeURIComponent(h.text)}'), '${h.filename}.txt', 'text/plain')">📄 .txt</button>
+            <button class="small-btn" onclick="deleteHistoryItem('${h.id}')" style="color:var(--danger)">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) {}
   }
 
+  function toggleHistoryDrawer() {
+    const drawer = document.getElementById('historyDrawer');
+    const icon = document.getElementById('historyToggleIcon');
+    if (drawer.style.display === 'none') {
+      drawer.style.display = 'block';
+      icon.textContent = '▲ Hide';
+      renderHistory();
+    } else {
+      drawer.style.display = 'none';
+      icon.textContent = '▼ Show';
+    }
+  }
+
+  function deleteHistoryItem(id) {
+    let history = JSON.parse(localStorage.getItem('vtt_transcription_history') || '[]');
+    history = history.filter(h => h.id !== id);
+    localStorage.setItem('vtt_transcription_history', JSON.stringify(history));
+    renderHistory();
+  }
+
+  function clearAllHistory() {
+    if (confirm("Are you sure you want to clear your local transcription history?")) {
+      localStorage.removeItem('vtt_transcription_history');
+      renderHistory();
+    }
+  }
+
+  // ==========================================
+  // 11. RESULT ITEM RENDERING
+  // ==========================================
   function appendResult(item) {
     const container = document.getElementById('resultsContainer');
     const div = document.createElement('div');
@@ -1101,9 +1560,26 @@
       `;
     } else {
       const safeText = (item.text || '(No speech detected)').replace(/</g, '&lt;');
-      let summaryHtml = '';
+      
+      // Segments markup for timestamp toggle
+      let segmentsHtml = '';
+      if (item.segments && item.segments.length) {
+        segmentsHtml = `
+          <div id="segments-box-${item.index}" class="segments-container" style="display:none;">
+            ${item.segments.map(s => `
+              <div class="segment-row">
+                <span class="time-tag">${formatSrtTime(s.start || 0).slice(3, 8)}</span>
+                <span style="direction:${isRtl ? 'rtl' : 'ltr'};">${(s.text || '').trim()}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // Summary markup
+      let summaryContent = '';
       if (item.summary) {
-        summaryHtml = `<div class="summary-box"><strong>📝 AI Summary:</strong> ${item.summary}</div>`;
+        summaryContent = formatSummaryHtml(item.summary);
       }
 
       div.innerHTML = `
@@ -1112,14 +1588,69 @@
           <div class="result-badges">
             <span style="color: var(--success); font-weight: 700;">⏱️ ${item.took_sec}s</span>
             <span>${item.duration ? 'Audio: ' + item.duration : ''}</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText(this.dataset.txt); this.innerText='Copied!';" data-txt="${safeText.replace(/"/g, '&quot;')}">📋 Copy</button>
+            <button class="small-btn" onclick="navigator.clipboard.writeText(this.dataset.txt); this.innerText='Copied!';" data-txt="${safeText.replace(/"/g, '&quot;')}">📋 Copy</button>
           </div>
         </div>
+
         <div class="result-text ${isRtl ? '' : 'ltr'}">${safeText}</div>
-        ${summaryHtml}
+
+        ${segmentsHtml}
+
+        <div id="summary-box-${item.index}" class="summary-card" style="${item.summary ? 'display:block;' : 'display:none;'}">
+          ${summaryContent}
+        </div>
+
+        <!-- EXPORT & ACTION BUTTONS -->
+        <div class="action-btn-group">
+          <button class="small-btn" onclick="exportSingle(${item.index}, 'txt')">📄 Download .TXT</button>
+          <button class="small-btn" onclick="exportSingle(${item.index}, 'srt')">🎬 Download .SRT</button>
+          <button class="small-btn" onclick="exportSingle(${item.index}, 'vtt')">🌐 Download .VTT</button>
+          ${item.segments && item.segments.length ? `
+            <button class="small-btn" onclick="const b = document.getElementById('segments-box-${item.index}'); b.style.display = b.style.display === 'none' ? 'block' : 'none';">⏱️ Toggle Timestamps</button>
+          ` : ''}
+          ${!item.summary ? `
+            <button class="small-btn" onclick="triggerManualSummary(${item.index})" style="color:var(--primary);">🤖 Summarize & Actions</button>
+          ` : ''}
+        </div>
       `;
     }
     container.prepend(div);
+  }
+
+  // Local job polling fallback
+  async function pollJob() {
+    if (!activeJobId) return;
+    try {
+      const r = await fetch(`/api/jobs/${activeJobId}?after=${resultsCount}`);
+      const d = await r.json();
+      if (!r.ok) return;
+
+      const pct = d.total ? Math.round((d.done / d.total) * 100) : 0;
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('jobStatusText').textContent = `Status: ${d.status.toUpperCase()} (${d.done}/${d.total} files, ${d.errors} errors)`;
+      document.getElementById('jobTimeText').textContent = `Elapsed: ${d.elapsed_sec}s`;
+      document.getElementById('currentFileText').textContent = d.current ? `Processing: ${d.current}` : (d.status === 'done' ? 'All files completed!' : '');
+      document.getElementById('etaText').textContent = d.eta_text ? `ETA: ~${d.eta_text}` : '';
+
+      if (d.results && d.results.length) {
+        d.results.forEach(res => {
+          appendResult(res);
+          completedTranscripts.push(res);
+          saveToHistory(res);
+        });
+        resultsCount += d.results.length;
+      }
+
+      if (d.status === 'done' || d.status === 'cancelled') {
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('cancelBtn').style.display = 'none';
+        if (completedTranscripts.length > 0) {
+          document.getElementById('globalExportBar').style.display = 'flex';
+        }
+        return;
+      }
+      pollTimer = setTimeout(pollJob, 1000);
+    } catch (e) { pollTimer = setTimeout(pollJob, 2000); }
   }
 
   async function cancelJob() {
@@ -1136,6 +1667,7 @@
   // Initialize
   initTheme();
   checkHealth();
+  renderHistory();
 </script>
 </body>
 </html>

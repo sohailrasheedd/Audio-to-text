@@ -243,7 +243,13 @@ def transcribe_one(path: Path, language: str, model_path: Path) -> dict:
         to = s.get("offsets", {}).get("to", 0) / 1000.0
         text = (s.get("text") or "").strip()
         if text:
-            segs.append({"start": fmt_time(frm), "end": fmt_time(to), "text": text})
+            segs.append({
+                "start": frm,
+                "end": to,
+                "start_fmt": fmt_time(frm),
+                "end_fmt": fmt_time(to),
+                "text": text
+            })
 
     full_text = " ".join(s["text"] for s in segs).strip()
     trans_list = data.get("transcription") or []
@@ -534,7 +540,8 @@ async def transcribe_endpoint(
             "duration": fmt_time(duration),
             "took_sec": took_sec,
             "language": result_data.get("language") or language,
-            "summary": summary
+            "summary": summary,
+            "segments": result_data.get("segments", [])
         }
     except Exception as e:
         return JSONResponse({"error": f"Server processing error: {str(e)}"}, status_code=500)
