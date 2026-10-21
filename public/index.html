@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>Voice to Text PRO - Hybrid Cloud & Local</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙️</text></svg>">
   <style>
     :root {
       --primary: #3b82f6;
@@ -735,6 +737,7 @@
   async function checkHealth() {
     try {
       const r = await fetch('/api/health');
+      if (!r.ok) throw new Error('Status ' + r.status);
       const d = await r.json();
       const bar = document.getElementById('healthBar');
       
@@ -759,13 +762,19 @@
         `;
       }
     } catch (e) {
-      console.warn("Health check fallback:", e);
       isServerlessEnvironment = true;
       const bar = document.getElementById('healthBar');
-      bar.innerHTML = `
-        <span class="badge ok">⚡ Online Cloud Mode Active</span>
-        <span class="badge info">☁️ Whisper API Ready</span>
-      `;
+      if (bar) {
+        bar.innerHTML = `
+          <span class="badge ok">⚡ Online Cloud Mode Active</span>
+          <span class="badge info">☁️ Whisper API Ready</span>
+        `;
+      }
+      const cloudRadio = document.querySelector('input[name="mode"][value="cloud"]');
+      if (cloudRadio) {
+        cloudRadio.checked = true;
+        toggleMode();
+      }
     }
   }
 
