@@ -363,8 +363,22 @@ def job_public(job: dict, after: int = 0) -> dict:
 def index():
     html_file = BASE_DIR / "index.html"
     if not html_file.exists():
-        return HTMLResponse("<h2>Error: index.html file nahi mili!</h2>", status_code=500)
+        return HTMLResponse("<h2>Error: index.html file not found</h2>", status_code=500)
     return html_file.read_text(encoding="utf-8")
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon_ico():
+    ico_path = BASE_DIR / "favicon.ico"
+    if ico_path.exists():
+        return FileResponse(ico_path, media_type="image/x-icon")
+    return HTMLResponse("", status_code=404)
+
+@app.get("/favicon.svg", include_in_schema=False)
+def favicon_svg():
+    svg_path = BASE_DIR / "favicon.svg"
+    if svg_path.exists():
+        return FileResponse(svg_path, media_type="image/svg+xml")
+    return HTMLResponse("", status_code=404)
 
 @app.get("/api/health")
 def health():
